@@ -20,7 +20,7 @@ class Todo(commands.Cog):
         self.bot.todo_dict[str(ctx.author.id)].append(item)
         await ctx.send(f"{ctx.author.mention} I added `{item}` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
         with open('todo.json', 'w') as f:
-            json.dump(self.bot.todo_dict[str(ctx.author.id)], f, indent=4)
+            json.dump(self.bot.todo_dict, f, indent=4)
 
     @commands.command(name='remove')
     async def remove_item(self, ctx, index: int):
@@ -68,6 +68,8 @@ class Todo(commands.Cog):
         if not choice:
             return await ctx.send(f"{ctx.author.mention} You have chosen not to clear your to-do list.")
         self.bot.todo_dict[str(ctx.author.id)] = []
+        with open('todo.json', 'w') as f:
+            json.dump(self.bot.todo_dict, f, indent=4)
         await ctx.send(f"{ctx.author.mention} Your to-do list has been completely cleared.")
 
 
