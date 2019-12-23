@@ -1,0 +1,2 @@
+token = ''  # Bot token as str. Bot will auto-exit if blank.
+prefix = ['.', '!']  # Prefix as list of str. Bot will auto-exit if blank.
