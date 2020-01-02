@@ -19,7 +19,7 @@ class Todo(commands.Cog):
             self.bot.todo_dict[str(ctx.author.id)] = []
         self.bot.todo_dict[str(ctx.author.id)].append(item)
         await ctx.send(f"{ctx.author.mention} I added `{item}` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
-        with open('todo.json', 'w') as f:
+        with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
     @commands.command(name='remove')
@@ -29,8 +29,10 @@ class Todo(commands.Cog):
             item = self.bot.todo_dict[str(ctx.author.id)].pop(index - 1)
         except IndexError:
             return await ctx.send(f"{ctx.author.mention} I couldn't find an item at that index.")
+        except KeyError:
+            return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
         await ctx.send(f"{ctx.author.mention} I removed the item at index {index} from your list. Item is below, in case this was an accident.\n\n`{item}`")
-        with open('todo.json', 'w') as f:
+        with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
     @commands.command(name='list')
@@ -46,6 +48,7 @@ class Todo(commands.Cog):
         count = 1
         for item in items:
             embed.description += f"**{count}**: {item}\n"
+            count += 1
         await ctx.send(f"{ctx.author.mention}", embed=embed)
 
     @commands.command(name='clear')
@@ -68,7 +71,7 @@ class Todo(commands.Cog):
         if not choice:
             return await ctx.send(f"{ctx.author.mention} You have chosen not to clear your to-do list.")
         self.bot.todo_dict[str(ctx.author.id)] = []
-        with open('todo.json', 'w') as f:
+        with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
         await ctx.send(f"{ctx.author.mention} Your to-do list has been completely cleared.")
 

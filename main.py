@@ -21,12 +21,8 @@ elif not prefix or not len(prefix[0]) > 0:
 
 bot = commands.Bot(command_prefix=prefix, description=description)
 
-if not os.path.exists('todo.json'):
-    with open('todo.json', 'w') as f:
-        f.write('{}')
-
-with open('todo.json', 'r') as f:
-    bot.todo_dict = json.load(f)
+if not os.path.exists('saves'):
+    os.mkdir('saves')
 
 
 # mostly taken from https://github.com/Rapptz/discord.py/blob/async/discord/ext/commands/bot.py
@@ -65,6 +61,11 @@ async def on_ready():
     for guild in bot.guilds:
         try:
             bot.guild = guild
+            if not os.path.exists('saves/{}.json'.format(str(guild.id))):
+                with open('saves/{}.json'.format(str(guild.id)), 'w') as f:
+                    f.write('{}')
+            with open('saves/{}.json'.format(str(guild.id)), 'r') as f:
+                bot.todo_dict = json.load(f)
             print(f"Initialized on {guild.name}.")
         except Exception as e:
             print(f"Failed to initialize on {guild.name}.\n{type(e).__name__}: {e}")
