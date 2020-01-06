@@ -21,6 +21,13 @@ elif not prefix or not len(prefix[0]) > 0:
 
 bot = commands.Bot(command_prefix=prefix, description=description)
 
+@bot.check  # taken and modified from https://discordpy.readthedocs.io/en/rewrite/ext/commands/commands.html#global-checks
+async def globally_block_dms(ctx):
+    if ctx.guild is None:
+        raise discord.ext.commands.NoPrivateMessage('test')
+        return False
+    return True
+
 if not os.path.exists('saves'):
     os.mkdir('saves')
 
@@ -33,6 +40,8 @@ async def on_command_error(ctx, error):
     elif isinstance(error, discord.ext.commands.errors.MissingRequiredArgument):
         await ctx.send("You are missing required arguments.")
         await ctx.send_help(ctx.command)
+    elif isinstance(error, discord.ext.commands.NoPrivateMessage):
+        await ctx.send("You cannot use this command in DMs!")
     elif isinstance(error, discord.ext.commands.errors.BadArgument):
         await ctx.send("A bad argument was provided, please try again.")
     else:
