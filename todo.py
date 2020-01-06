@@ -13,12 +13,15 @@ class Todo(commands.Cog):
     @commands.command(name='add')
     async def add_item(self, ctx, *, item):
         """Adds an item to the author's to-do list"""
+        if ctx.message.attachments:
+            for atch in ctx.message.attachments:
+                item += "\n" + atch.url
         try:
             self.bot.todo_dict[str(ctx.author.id)]
         except KeyError:
             self.bot.todo_dict[str(ctx.author.id)] = []
         self.bot.todo_dict[str(ctx.author.id)].append(item)
-        await ctx.send(f"{ctx.author.mention} I added `{item}` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
+        await ctx.send(f"{ctx.author.mention} I added ```{item}``` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
         with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
@@ -29,9 +32,7 @@ class Todo(commands.Cog):
         if " " in index or "," in index:
             index = index.replace(', ', ' ').replace(',', ' ')
             multi_index = index.split(' ')
-            print(multi_index)
             multi_index = sorted(multi_index, key=int, reverse=True)
-            print(multi_index)
             is_multi = True
         if is_multi:
             items = []
