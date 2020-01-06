@@ -23,15 +23,46 @@ class Todo(commands.Cog):
             json.dump(self.bot.todo_dict, f, indent=4)
 
     @commands.command(name='remove')
-    async def remove_item(self, ctx, index: int):
+    async def remove_item(self, ctx, *, index):
         """Removes an item from the author's to-do list"""
-        try:
-            item = self.bot.todo_dict[str(ctx.author.id)].pop(index - 1)
-        except IndexError:
-            return await ctx.send(f"{ctx.author.mention} I couldn't find an item at that index.")
-        except KeyError:
-            return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
-        await ctx.send(f"{ctx.author.mention} I removed the item at index {index} from your list. Item is below, in case this was an accident.\n\n`{item}`")
+        is_multi = False
+        if " " in index or "," in index:
+            index = index.replace(', ', ' ').replace(',', ' ')
+            multi_index = index.split(' ')
+            print(multi_index)
+            multi_index = sorted(multi_index, key=int, reverse=True)
+            print(multi_index)
+            is_multi = True
+        if is_multi:
+            items = []
+            failed_indexes = []
+            successful_indexes = []
+            for i in multi_index:
+                if not i.isdigit() or int(i) < 1:
+                    await ctx.send(f"{ctx.author.mention} {i} is an invalid character, and was skipped.")
+                    continue
+                try:
+                    items.insert(0, self.bot.todo_dict[str(ctx.author.id)].pop(int(i) - 1))
+                    successful_indexes.insert(0, i)
+                except IndexError:
+                    failed_indexes.append(i)
+                except KeyError:
+                    return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
+            msg = ""
+            items_str = '\n'.join(items)
+            if len(items_str) > 0:
+                msg += f"{ctx.author.mention} I removed the item(s) at indexes `{', '.join(successful_indexes)}` from your list. Item is below, in case this was an accident.\n\n`{items_str}`"
+            if len(failed_indexes) > 0:
+                msg += f"\n I couldn't find an item at indexes `{' '.join(failed_indexes)}`."
+            await ctx.send(msg)
+        else:
+            try:
+                item = self.bot.todo_dict[str(ctx.author.id)].pop(int(index) - 1)
+            except IndexError:
+                return await ctx.send(f"{ctx.author.mention} I couldn't find an item at that index.")
+            except KeyError:
+                return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
+            await ctx.send(f"{ctx.author.mention} I removed the item at index {index} from your list. Item is below, in case this was an accident.\n\n`{item}`")
         with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
