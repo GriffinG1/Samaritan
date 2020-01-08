@@ -21,6 +21,7 @@ elif not prefix or not len(prefix[0]) > 0:
 
 bot = commands.Bot(command_prefix=prefix, description=description)
 
+
 @bot.check  # taken and modified from https://discordpy.readthedocs.io/en/rewrite/ext/commands/commands.html#global-checks
 async def globally_block_dms(ctx):
     if ctx.guild is None:

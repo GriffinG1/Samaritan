@@ -2,4 +2,4 @@
 *.pyc
 .vscode
 config.py
-todo.json
+saves

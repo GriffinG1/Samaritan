@@ -21,7 +21,7 @@ class Todo(commands.Cog):
         except KeyError:
             self.bot.todo_dict[str(ctx.author.id)] = []
         self.bot.todo_dict[str(ctx.author.id)].append(item)
-        await ctx.send(f"{ctx.author.mention} I added ```{item}``` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
+        await ctx.send(f">>> {ctx.author.mention} I added ```{item}``` to your list. There are now {len(self.bot.todo_dict[str(ctx.author.id)])} item(s) on your list.")
         with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
@@ -32,15 +32,22 @@ class Todo(commands.Cog):
         if " " in index or "," in index:
             index = index.replace(', ', ' ').replace(',', ' ')
             multi_index = index.split(' ')
-            multi_index = sorted(multi_index, key=int, reverse=True)
+            try:
+                multi_index = sorted(multi_index, key=int, reverse=True)
+            except ValueError:
+                for x in multi_index:
+                    if not x.isdigit():
+                        multi_index.remove(x)
+                multi_index = sorted(multi_index, key=int, reverse=True)
             is_multi = True
         if is_multi:
             items = []
             failed_indexes = []
             successful_indexes = []
+            msg = ""
             for i in multi_index:
-                if not i.isdigit() or int(i) < 1:
-                    await ctx.send(f"{ctx.author.mention} {i} is an invalid character, and was skipped.")
+                if int(i) < 1:
+                    msg += f"{i} is an invalid value, and was skipped."
                     continue
                 try:
                     items.insert(0, self.bot.todo_dict[str(ctx.author.id)].pop(int(i) - 1))
@@ -49,21 +56,24 @@ class Todo(commands.Cog):
                     failed_indexes.append(i)
                 except KeyError:
                     return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
-            msg = ""
-            items_str = '\n'.join(items)
+            items_str = ""
+            for i in range(len(items)):
+                items_str += f"{successful_indexes[i]}: {items[i]}\n"
             if len(items_str) > 0:
-                msg += f"{ctx.author.mention} I removed the item(s) at indexes `{', '.join(successful_indexes)}` from your list. Item is below, in case this was an accident.\n\n`{items_str}`"
+                msg += f">>> {ctx.author.mention} I removed the item(s) at indexes `{', '.join(successful_indexes)}` from your list. Item is below, in case this was an accident.\n\n```{items_str}```"
             if len(failed_indexes) > 0:
                 msg += f"\n I couldn't find an item at indexes `{' '.join(failed_indexes)}`."
             await ctx.send(msg)
         else:
+            if not index.isdigit() or int(index) < 1:
+                return await ctx.send(f"{ctx.author.mention} `{index}` isn't a valid integer!")
             try:
                 item = self.bot.todo_dict[str(ctx.author.id)].pop(int(index) - 1)
             except IndexError:
                 return await ctx.send(f"{ctx.author.mention} I couldn't find an item at that index.")
             except KeyError:
                 return await ctx.send(f"{ctx.author.mention} You have no items on your list!")
-            await ctx.send(f"{ctx.author.mention} I removed the item at index {index} from your list. Item is below, in case this was an accident.\n\n`{item}`")
+            await ctx.send(f">>> {ctx.author.mention} I removed the item at index {index} from your list. Item is below, in case this was an accident.\n\n```{item}```")
         with open('saves/{}.json'.format(str(ctx.guild.id)), 'w') as f:
             json.dump(self.bot.todo_dict, f, indent=4)
 
