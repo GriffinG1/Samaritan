@@ -47,11 +47,12 @@ async def on_command_error(ctx, error):
         await ctx.send("A bad argument was provided, please try again.")
     else:
         if ctx.command:
-            await ctx.send("An error occurred while processing the `{}` command.".format(ctx.command.name))
-        print('Ignoring exception in command {0.command} in {0.message.channel}'.format(ctx))
+            await ctx.send(f"An error occurred while processing the `{ctx.command.name}` command.")
+        print(f'Ignoring exception in command {ctx.command} in {ctx.message.channel}')
         tb = traceback.format_exception(type(error), error, error.__traceback__)
         error_trace = "".join(tb)
         print(error_trace)
+        await bot.err_log_channel.send(f"An error occurred while processing the `{ctx.command.name}` command in channel `{ctx.message.channel}`.", embed=embed)
 
 
 @bot.event
@@ -63,6 +64,7 @@ async def on_error(event_method, *args, **kwargs):
     tb = traceback.format_exc()
     error_trace = "".join(tb)
     print(error_trace)
+    await bot.err_log_channel.send(f"An error occurred while processing `{event_method}`.", embed=embed)
 
 
 @bot.event
@@ -77,6 +79,7 @@ async def on_ready():
             with open('saves/{}.json'.format(str(guild.id)), 'r') as f:
                 bot.todo_dict = json.load(f)
             print(f"Initialized on {guild.name}.")
+            bot.err_log_channel = config.err_log_channel
         except Exception as e:
             print(f"Failed to initialize on {guild.name}.\n{type(e).__name__}: {e}")
 

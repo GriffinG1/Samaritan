@@ -1,2 +1,3 @@
 token = ''  # Bot token as str. Bot will auto-exit if blank.
 prefix = ['.', '!']  # Prefix as list of str. Bot will auto-exit if blank.
+err_log_channel = 0  # Error log channel as int
